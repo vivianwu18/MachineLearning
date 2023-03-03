@@ -5,7 +5,9 @@ Coverage of supervised and unsupervised learning, neural networks, natural langu
 
 ## 2. Logistic Regression
 
-## 3. Cross Validation
+## 3. Model Selection
+### a. Cross Validation
+### b. Lasso Regression
 
 ## 4. Regression Discontinuity Design (RDD)
 
