@@ -1,0 +1,110 @@
+---
+title: "Assignment 3_Meng-Wei Wu"
+author: "Meng-Wei Wu"
+date: '2023-01-24'
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(caret)
+library(glmnet)
+library(moments)
+```
+
+### Features selection
+How would you choose a sample subset (such as missing value, nulls, empty columns) of this dataset? What criteria would you consider when selecting a training subset from the above dataset (such as balanced distribution between training and test for the treated observations) ?
+```{r}
+heart <- read_csv("heart.csv", show_col_types = FALSE)
+```
+
+#### Comment
+First of all, we have to make sure all the columns we want to use as variables in the model have valid values. Otherwise, we should consider remove the data which contains any missing or null values. Also, we could remove the column which do not contain any data points. Secondly, we should assure that the training subset is large enough compared to the testing dataset, so the model we trained will have more accurate coefficients.
+
+### Model building
+Randomly split the dataset into test and training sets using 80% observations as training set. Fit a simple linear regression model (full model) to predict the heart attack probability and test your model against the test set.  Explain your model and obtain the R^2 for the predictions of the test data set (i.e., a true OOS R^2).
+```{r}
+# check and remove missing values
+summary(heart)
+
+# remove empty columns
+heart <- subset(heart, select = -c(7, 11, 15))
+
+# replace NA's with mean
+heart <- heart %>%
+  mutate(height = replace_na(height, mean(height, na.rm = TRUE))) %>%
+  mutate(fat_free_wt = replace_na(fat_free_wt, mean(fat_free_wt, na.rm = TRUE))) %>%
+  mutate(chest_dim = replace_na(chest_dim, mean(chest_dim, na.rm = TRUE))) %>%
+  mutate(hip_dim = replace_na(hip_dim, mean(hip_dim, na.rm = TRUE))) %>%
+  mutate(thigh_dim = replace_na(thigh_dim, mean(thigh_dim, na.rm = TRUE))) %>%
+  mutate(biceps_dim = replace_na(biceps_dim, mean(biceps_dim, na.rm = TRUE))) 
+
+summary(heart)
+skewness(heart)
+# split the data set into training and test data sets
+set.seed(1)
+
+sample <- sample(c(TRUE, FALSE), nrow(heart), replace = TRUE, prob = c(0.8, 0.2))
+train  <- heart[sample, ]
+test   <- heart[!sample, ]
+
+# create the model
+model1 <- glm(heart_attack ~ ., data = train)
+summary(model1)
+
+xactual <- test[1:16]
+ypred_model1 <- predict(model1, newdata = xactual)
+yactual <- test$heart_attack
+
+# calculate out-of-sample r-squared
+rsq_model1 <- 1 - sum((yactual - ypred_model1) ^ 2)/ sum((yactual - mean(yactual)) ^ 2)
+rsq_model1
+```
+
+## Cross validation
+Use only the training sets from question 1 and estimate an 8-fold cross-validation to estimate the R^2 of the full model. e., use cross-validation to train (on 7/8 of the training set) and evaluate (on 1/8 of the training set).  Calculate the mean R^2 from the 8-fold cross-validation and compare it with the R^2 from question 1.  Please explain your observation.
+```{r}
+set.seed(1)
+train_control <- trainControl(method = "cv", number = 8)
+
+model2 <- train(heart_attack ~ ., data = train, trControl = train_control, method = "glm")
+summary(model2)
+print(model2)
+print(model2$resample$Rsquared)
+```
+
+### Lasso regression
+Fit a Lasso regression to predict the heart attack probability. Use cross-validation to obtain lambda_min as well as lambda_1se. Explain the two resulting models. Which one would you choose?
+```{r}
+ytrain <- train$heart_attack
+xtrain <- data.matrix(train[, 1:16])
+
+# find the optimal lambda by using k-fold CV
+model3 <- cv.glmnet(xtrain, ytrain, nfolds = 8)
+lambda_min <- model3$lambda.min
+lambda_min
+
+lambda_1se <- model3$lambda.1se
+lambda_1se
+
+plot(model3)
+
+# find out the model with min lambda
+model_lambda_min <- glmnet(xtrain, ytrain, lambda = lambda_min)
+coef(model_lambda_min)
+
+ypred_lambda_min <- predict(model_lambda_min, s = lambda_min, newx = data.matrix(test[, 1:16]))
+yactual <- test$heart_attack
+rsq_lambda_min <- 1 - sum((yactual - ypred_lambda_min) ^ 2)/ sum((yactual - mean(yactual)) ^ 2)
+rsq_lambda_min
+
+# find out the model with 1se lambda
+model_lambda_1se <- glmnet(xtrain, ytrain, lambda = lambda_1se)
+coef(model_lambda_1se)
+
+ypred_lambda_1se <- predict(model_lambda_1se, s = lambda_1se, newx = data.matrix(test[, 1:16]))
+rsq_lambda_1se <- 1 - sum((yactual - ypred_lambda_1se) ^ 2)/ sum((yactual - mean(yactual)) ^ 2)
+rsq_lambda_1se
+```
