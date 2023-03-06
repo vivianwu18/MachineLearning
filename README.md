@@ -14,3 +14,7 @@ Coverage of supervised and unsupervised learning, neural networks, natural langu
 ## 5. k-Nearest Neighbors (kNN)
 
 ## 6. Principal Component Analysis (PCA)
+
+## 7. Decision Tree
+
+## 8. Random Forest
