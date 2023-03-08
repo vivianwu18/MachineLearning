@@ -1,65 +1,48 @@
----
-title: "Assignment 1"
-author: "Meng-Wei Wu"
-date: '2023-01-09'
-output: html_document
----
-
-```{r}
 library(readr)
 library(dplyr)
 library(ggplot2)
 library(leaps)
 library(fastDummies)
 library(car)
-```
+
 
 ### Data simulation
-Write code that produces a 10,000 x 1001 matrix (rows x cols) of random numbers drawn from N(0,1). Seed your code using the last 4 digits of your phone number (this number will be different for everyone).  Every time you run the code, it should now yield the exact same (“random”) dataset.
-```{r}
 set.seed(3531)
 data <- rnorm(10010000)
 matrix <- matrix(data, nrow = 10000, ncol = 1001)
 colnames(matrix) <- 1:1001
 hist(matrix)
-```
 
-```{r}
 y <- matrix[, 1]
 num <- 1
 for (num in 1:1000){
   assign(paste("x", num, sep = ""), matrix[, num + 1])
   num = num + 1
 }
-```
+
 
 ### Model building
 Regress y on x’s. Is an intercept needed?  Why?  Why not?
-```{r}
+  ```{r}
 variables <- paste("x", 1:1000, sep = "")
 formula1 <- paste("y", paste(variables, collapse = "+"), sep = "~")
 formula2 <- paste(formula1, "-1", sep = "")
 
-# with intercept
+### with intercept
 model1 <- lm(formula1)
 summary(model1)
 
-# without intercept
+### without intercept
 model2 <- lm(formula2)
 summary(model2)
-```
 
 ### P-values visualization
-Create a histogram of the p-values from the regression in Q3. What distribution does this histogram look like?
-```{r}
 pvalues <- summary(model2)$coefficients[, 4]
 hist(pvalues, main = "Histogram of the p-values" , xlab = "p-value")
-```
+
 
 ### False discovery
-How many “significant” variables do you expect to find knowing how the data was generated? How many “significant” variables does the regression yield if alpha = 0.01?  What does this tell us?
-```{r}
-# alpha = 0.01
+### alpha = 0.01
 i <- 1
 alpha1 <- 0.01
 count1 <- 0
@@ -71,11 +54,9 @@ for (i in 1:1000) {
   i = i + 1  
 }
 count1
-```
+
 
 ### Benjamini-Hochberg procedure
-Given the p values you find, use the BH procedure to control the FDR with a q of 0.1. How many “true” discoveries do you estimate?
-```{r}
 pvalues_df <- data.frame(pvalues)
 q <- 0.1
 n <- 1001
@@ -84,5 +65,5 @@ pvalues_df <- pvalues_df %>%
   mutate(rank = 1:1000) %>%
   mutate(BHvalues = q * rank / n) %>%
   mutate(test = ifelse(pvalues <= BHvalues, "TRUE", "FALSE"))
+
 head(pvalues_df, 15)
-```
