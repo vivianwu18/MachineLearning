@@ -1,31 +1,14 @@
----
-title: "Assignment 3_Meng-Wei Wu"
-author: "Meng-Wei Wu"
-date: '2023-01-24'
-output: html_document
----
-
-```{r}
 library(readr)
 library(dplyr)
 library(tidyr)
 library(caret)
 library(glmnet)
 library(moments)
-```
 
-### Features selection
-How would you choose a sample subset (such as missing value, nulls, empty columns) of this dataset? What criteria would you consider when selecting a training subset from the above dataset (such as balanced distribution between training and test for the treated observations) ?
-```{r}
+
 heart <- read_csv("heart.csv", show_col_types = FALSE)
-```
-
-#### Comment
-First of all, we have to make sure all the columns we want to use as variables in the model have valid values. Otherwise, we should consider remove the data which contains any missing or null values. Also, we could remove the column which do not contain any data points. Secondly, we should assure that the training subset is large enough compared to the testing dataset, so the model we trained will have more accurate coefficients.
 
 ### Model building
-Randomly split the dataset into test and training sets using 80% observations as training set. Fit a simple linear regression model (full model) to predict the heart attack probability and test your model against the test set.  Explain your model and obtain the R^2 for the predictions of the test data set (i.e., a true OOS R^2).
-```{r}
 # check and remove missing values
 summary(heart)
 
@@ -43,6 +26,7 @@ heart <- heart %>%
 
 summary(heart)
 skewness(heart)
+
 # split the data set into training and test data sets
 set.seed(1)
 
@@ -61,11 +45,9 @@ yactual <- test$heart_attack
 # calculate out-of-sample r-squared
 rsq_model1 <- 1 - sum((yactual - ypred_model1) ^ 2)/ sum((yactual - mean(yactual)) ^ 2)
 rsq_model1
-```
 
-## Cross validation
-Use only the training sets from question 1 and estimate an 8-fold cross-validation to estimate the R^2 of the full model. e., use cross-validation to train (on 7/8 of the training set) and evaluate (on 1/8 of the training set).  Calculate the mean R^2 from the 8-fold cross-validation and compare it with the R^2 from question 1.  Please explain your observation.
-```{r}
+
+### Cross validation
 set.seed(1)
 train_control <- trainControl(method = "cv", number = 8)
 
@@ -73,11 +55,11 @@ model2 <- train(heart_attack ~ ., data = train, trControl = train_control, metho
 summary(model2)
 print(model2)
 print(model2$resample$Rsquared)
-```
+
 
 ### Lasso regression
 Fit a Lasso regression to predict the heart attack probability. Use cross-validation to obtain lambda_min as well as lambda_1se. Explain the two resulting models. Which one would you choose?
-```{r}
+
 ytrain <- train$heart_attack
 xtrain <- data.matrix(train[, 1:16])
 
@@ -107,4 +89,3 @@ coef(model_lambda_1se)
 ypred_lambda_1se <- predict(model_lambda_1se, s = lambda_1se, newx = data.matrix(test[, 1:16]))
 rsq_lambda_1se <- 1 - sum((yactual - ypred_lambda_1se) ^ 2)/ sum((yactual - mean(yactual)) ^ 2)
 rsq_lambda_1se
-```
