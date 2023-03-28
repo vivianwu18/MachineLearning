@@ -58,8 +58,6 @@ print(model2$resample$Rsquared)
 
 
 ### Lasso regression
-Fit a Lasso regression to predict the heart attack probability. Use cross-validation to obtain lambda_min as well as lambda_1se. Explain the two resulting models. Which one would you choose?
-
 ytrain <- train$heart_attack
 xtrain <- data.matrix(train[, 1:16])
 
