@@ -30,3 +30,19 @@ A Decision Tree is a machine learning algorithm used for classification and regr
 
 ## 8. Random Forest
 Random forest is a popular ensemble learning algorithm used in machine learning for classification and regression tasks. It is a combination of multiple decision trees, where each tree is trained on a random subset of the training data and a random subset of the features.
+
+# Final Project - Predictive Modeling to Control Customer Churn Rates
+## Overview
+In this report, we are going to apply exploratory data analysis to identify patterns and trends that indicate a higher likelihood of churn. It will be used in developing four predictive models.The Random Forest model showed that elderly, couples and male consumers have higher retention rate. Important features identified for marketing campaigns would address specific concerns of at-risk customers. By reducing churn, the company can increase customer satisfaction and loyalty, leading to higher retention rates and increased revenue.
+
+## Data Source
+Telco Customer Churn on Kaggle: https://www.kaggle.com/datasets/blastchar/telco-customer-churn?datasetId=13996&sortBy=voteCount
+
+## Model Results
+| Model Name | Accuracy | Precision |
+| ---------- | ---------- | ---------- |
+| CATboost | 1.14 |
+| XGBOOST | 1.61 | 
+| Linear Regression | 6.31 |
+| PCA transform | 13.76 | 
+
