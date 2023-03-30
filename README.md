@@ -41,8 +41,8 @@ Telco Customer Churn on Kaggle: https://www.kaggle.com/datasets/blastchar/telco-
 ## Model Results
 | Model Name | Accuracy | Precision |
 | ---------- | ---------- | ---------- |
-| CATboost | 1.14 |
-| XGBOOST | 1.61 | 
-| Linear Regression | 6.31 |
-| PCA transform | 13.76 | 
+| Logistic Regression | 0.7904 | 0.7719 |
+| Decision Tree | 0.7662 | 0.7694 |
+| Random Forests | 0.8456 | 0.8347 |
+| XGBoost | 0.8441 | 0.8318 |
 
